@@ -1,0 +1,371 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mavyc Digital | Máquinas de Vendas Automáticas</title>
+    
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Paleta Mavyc Digital */
+        :root {
+            --bg-dark: #020813;
+            --bg-card: #0A1128;
+            --blue-mavyc: #0044FF;
+            --blue-light: #52B5F9;
+            --white: #FFFFFF;
+            --gray-text: #94A3B8;
+            --green-zap: #25D366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: rgba(2, 8, 19, 0.95);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(82, 181, 249, 0.2);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .logo span { color: var(--blue-light); }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+        nav a {
+            color: var(--gray-text);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        nav a:hover { color: var(--blue-light); }
+
+        .btn-header {
+            background: var(--blue-mavyc);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-header:hover { background: var(--blue-light); color: var(--bg-dark); }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+            background: radial-gradient(circle at center, rgba(0, 68, 255, 0.15) 0%, var(--bg-dark) 70%);
+            padding-top: 80px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+        .hero h1 span { color: var(--blue-light); }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-text);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn-primary {
+            background: var(--blue-mavyc);
+            color: var(--white);
+            padding: 1.2rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid var(--blue-mavyc);
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 68, 255, 0.4);
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--blue-light);
+            border-color: var(--blue-light);
+        }
+
+        /* NOSSOS PILARES (SERVIÇOS) */
+        .pilares {
+            padding: 5rem 5%;
+            background: var(--bg-card);
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .pilares h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 3rem; }
+        .pilares h2 span { color: var(--blue-light); }
+
+        .grid-pilares {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card-pilar {
+            background: var(--bg-dark);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(82, 181, 249, 0.1);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .card-pilar:hover {
+            transform: translateY(-10px);
+            border-color: var(--blue-mavyc);
+            box-shadow: 0 10px 30px rgba(0, 68, 255, 0.2);
+        }
+
+        .card-pilar i { font-size: 3rem; color: var(--blue-light); margin-bottom: 1.5rem; }
+        .card-pilar h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--white); }
+        .card-pilar p { color: var(--gray-text); line-height: 1.6; }
+
+        /* SIMULADOR DE IA */
+        .secao-simulador {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .simulador-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 3rem;
+            border: 1px solid rgba(82, 181, 249, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .simulador-container h2 { font-size: 2.2rem; margin-bottom: 1rem; font-weight: 900; }
+        .simulador-container p { color: var(--gray-text); margin-bottom: 2rem; }
+
+        .ia-input {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--bg-dark);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .ia-input:focus { border-color: var(--blue-light); }
+
+        .btn-ia {
+            width: 100%;
+            background: var(--blue-mavyc);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-ia:hover { background: var(--blue-light); color: var(--bg-dark); }
+
+        #ia-loading { display: none; margin-top: 1.5rem; color: var(--blue-light); font-weight: bold; }
+        
+        #ia-resultado {
+            display: none;
+            margin-top: 2rem;
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-left: 4px solid var(--blue-light);
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* WHATSAPP FLUTUANTE */
+        .zap-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--green-zap);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 9999;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .zap-float:hover { transform: scale(1.1); }
+
+        /* FOOTER */
+        footer {
+            background: #01040A;
+            padding: 3rem 5%;
+            text-align: center;
+            color: var(--gray-text);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            nav ul { display: none; }
+            .btn-header { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header>
+        <a href="#" class="logo">MAVYC <span>DIGITAL</span></a>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Início</a></li>
+                <li><a href="#servicos">Nossa Engenharia</a></li>
+                <li><a href="#simulador">Simulador IA</a></li>
+            </ul>
+        </nav>
+        <a href="https://wa.me/5584981549052?text=Olá! Vim pelo site da Mavyc e quero escalar minhas vendas." class="btn-header" target="_blank">Falar com Especialista</a>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero">
+        <h1>Sua empresa precisa de uma <span>Máquina de Vendas</span></h1>
+        <p>A Mavyc Digital une Engenharia de Sites Rápidos, Gestão de Tráfego Pago e Inteligência Artificial para atrair o cliente certo todos os dias para o seu negócio.</p>
+        <a href="#simulador" class="btn-primary">Criar Minha Estratégia Grátis</a>
+    </section>
+
+    <!-- PILARES DE SERVIÇO (Substitui o Vídeo) -->
+    <section id="servicos" class="pilares">
+        <h2>A Engenharia por trás da <span>Conversão</span></h2>
+        
+        <div class="grid-pilares">
+            <div class="card-pilar">
+                <i class="fa-solid fa-code"></i>
+                <h3>Sites de Alta Performance</h3>
+                <p>O seu cliente não tem paciência para sites lentos. Criamos Landing Pages com carregamento instantâneo, design agressivo e focadas 100% em capturar contatos.</p>
+            </div>
+            
+            <div class="card-pilar">
+                <i class="fa-solid fa-bullseye"></i>
+                <h3>Tráfego Pago Cirúrgico</h3>
+                <p>Chega de comprar cliques que não viram vendas. Nossas campanhas no Google e Meta Ads são desenhadas para cercar quem já está com o cartão de crédito na mão.</p>
+            </div>
+            
+            <div class="card-pilar">
+                <i class="fa-solid fa-robot"></i>
+                <h3>Automação & IA</h3>
+                <p>Implementamos Assistentes Virtuais Inteligentes no seu ecossistema. Seu negócio passa a atender, qualificar e direcionar clientes 24 horas por dia, 7 dias por semana.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIMULADOR DE IA -->
+    <section id="simulador" class="secao-simulador">
+        <div class="simulador-container">
+            <h2>Simulador de Estratégia <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--blue-light);"></i></h2>
+            <p>Nossa IA desenha o escopo perfeito para o seu negócio em segundos. Digite o seu nicho abaixo (Ex: Clínica de Estética, Imobiliária, Loja de Rodas):</p>
+            
+            <input type="text" id="nichoCliente" class="ia-input" placeholder="Qual é o seu ramo de atuação?">
+            <button class="btn-ia" onclick="gerarEstrategiaIA()"><i class="fa-solid fa-bolt"></i> Gerar Máquina de Vendas</button>
+
+            <div id="ia-loading">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> A IA está analisando a concorrência do seu setor...
+            </div>
+
+            <div id="ia-resultado">
+                <h4 style="color: white; margin-bottom: 10px;"><i class="fa-solid fa-check" style="color: var(--green-zap);"></i> Estratégia Mapeada!</h4>
+                <p id="resposta-ia" style="color: var(--gray-text); line-height: 1.6;"></p>
+                <a href="https://wa.me/5584981549052?text=Olá Tiago! Fiz o teste no simulador da Mavyc e quero aplicar essa estratégia." target="_blank" style="display: inline-block; margin-top: 15px; background: var(--green-zap); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Aplicar Estratégia com a Equipe
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <h2 style="color: var(--white); font-weight: 900; margin-bottom: 10px;">MAVYC <span style="color: var(--blue-light);">DIGITAL</span></h2>
+        <p>Acelerando negócios locais e digitais através da tecnologia e tráfego pago.</p>
+        <p style="margin-top: 2rem; font-size: 0.8rem;">&copy; 2026 Mavyc Digital. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- ZAP FLUTUANTE -->
+    <a href="https://wa.me/5584981549052?text=Olá! Quero transformar meu site numa máquina de vendas." class="zap-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- SCRIPT SIMULADOR -->
+    <script>
+        function gerarEstrategiaIA() {
+            const nicho = document.getElementById('nichoCliente').value;
+            if(!nicho) { alert("Por favor, digite o nicho da sua empresa!"); return; }
+
+            document.getElementById('ia-resultado').style.display = 'none';
+            document.getElementById('ia-loading').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('ia-loading').style.display = 'none';
+                document.getElementById('resposta-ia').innerHTML = `Para o setor de <strong>${nicho}</strong>, a estratégia de maior conversão hoje é:<br><br>1. Uma Landing Page de Alta Velocidade com carregamento instantâneo.<br>2. Campanhas focadas no Google/Meta Ads para captar clientes já com intenção de compra.<br>3. Um Assistente de IA para responder clientes fora do horário comercial.<br><br>Nós da Mavyc podemos implementar isso no seu negócio.`;
+                document.getElementById('ia-resultado').style.display = 'block';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
