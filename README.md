@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     actor O as Operador/Gerente
