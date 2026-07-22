@@ -1,239 +1,432 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mavyc PDV - Frente de Caixa</title>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root { 
-            --primaria: #ea580c; 
-            --secundaria: #334155; 
-            --sucesso: #16a34a; 
-            --alerta: #eab308; 
-            --erro: #dc2626; 
-            --fundo: #f8fafc; 
-            --texto: #0f172a; 
-            --fiscal: #4f46e5; 
-            --whatsapp: #25D366;
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--fundo); color: var(--texto); height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        
-        .tela { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; }
-        .tela.ativa { display: flex; }
-        
-        .login-wrapper { background: linear-gradient(135deg, #1e293b, #0f172a); justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border-top: 6px solid var(--primaria); }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #475569; font-size: 14px; }
-        .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; }
-        .btn-universal { width: 100%; padding: 15px; background: var(--primaria); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-universal:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        
-        .top-bar { background: var(--secundaria); color: white; padding: 0 25px; height: 65px; display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 4px solid var(--primaria); }
-        .pdv-container { display: flex; width: 100%; height: calc(100% - 65px); background: white; }
-        .cupom-area { width: 45%; background: white; padding: 30px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .cupom-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; font-weight: 600; padding-bottom: 12px; border-bottom: 2px solid var(--secundaria); font-size: 14px; }
-        .produtos-lista { flex-grow: 1; overflow-y: auto; margin-top: 10px; }
-        .item-cupom { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; align-items: center; }
-        
-        .total-box { background: #ffffff; color: var(--primaria); padding: 25px; border-radius: 12px; text-align: center; margin-top: 20px; border: 4px solid var(--primaria); box-shadow: 0 4px 15px rgba(234, 88, 12, 0.15); }
-        .total-box h3 { font-size: 16px; letter-spacing: 1px; margin-bottom: 5px; font-weight: 800; color: var(--secundaria); }
-        .total-box p { font-size: 42px; font-weight: 900; }
-        
-        .operacao-area { width: 55%; padding: 30px; display: flex; flex-direction: column; background: #f8fafc; justify-content: space-between; }
-        .terminal-log { background: #0f172a; color: #38bdf8; padding: 15px; border-radius: 8px; height: 110px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-bottom: 15px; border-left: 4px solid var(--alerta); }
-        .area-balanca { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; gap: 10px; align-items: center; border: 1px solid #cbd5e1; }
-        .area-balanca input { padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; }
-        .input-codigo { width: 100%; padding: 22px; font-size: 38px; text-align: center; border: 3px solid var(--primaria); border-radius: 12px; outline: none; font-weight: bold; }
-        
-        .fechamento-painel { background: var(--secundaria); padding: 25px; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-bottom: 6px solid var(--primaria); }
-        .fechamento-painel label { font-size: 17px !important; font-weight: 900 !important; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 8px; color: white; }
-        .fechamento-painel input, .fechamento-painel select { background: #1e293b !important; color: #ffffff !important; border: 3px solid #64748b !important; font-size: 28px !important; font-weight: 900 !important; padding: 16px !important; border-radius: 10px !important; }
-        .fechamento-painel input:focus, .fechamento-painel select:focus { border-color: var(--primaria) !important; }
-        #box-troco { color: #38bdf8 !important; font-size: 36px !important; text-shadow: 0 2px 8px rgba(0,0,0,0.8); font-weight: 900; }
-        
-        .dashboard-area { padding: 30px; background: #f1f5f9; width: 100%; height: calc(100% - 65px); overflow-y: auto; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mavyc Digital | Máquinas de Vendas Automáticas</title>
+    
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Paleta Mavyc Digital */
+        :root {
+            --bg-dark: #020813;
+            --bg-card: #0A1128;
+            --blue-mavyc: #0044FF;
+            --blue-light: #52B5F9;
+            --white: #FFFFFF;
+            --gray-text: #94A3B8;
+            --green-zap: #25D366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: rgba(2, 8, 19, 0.95);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(82, 181, 249, 0.2);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .logo span { color: var(--blue-light); }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+        nav a {
+            color: var(--gray-text);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        nav a:hover { color: var(--blue-light); }
+
+        .btn-header {
+            background: var(--blue-mavyc);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-header:hover { background: var(--blue-light); color: var(--bg-dark); }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+            background: radial-gradient(circle at center, rgba(0, 68, 255, 0.15) 0%, var(--bg-dark) 70%);
+            padding-top: 80px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+        .hero h1 span { color: var(--blue-light); }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-text);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn-primary {
+            background: var(--blue-mavyc);
+            color: var(--white);
+            padding: 1.2rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid var(--blue-mavyc);
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 68, 255, 0.4);
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--blue-light);
+            border-color: var(--blue-light);
+        }
+
+        /* NOSSOS PILARES (SERVIÇOS) */
+        .pilares {
+            padding: 5rem 5%;
+            background: var(--bg-card);
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .pilares h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 3rem; }
+        .pilares h2 span { color: var(--blue-light); }
+
+        .grid-pilares {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card-pilar {
+            background: var(--bg-dark);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(82, 181, 249, 0.1);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .card-pilar:hover {
+            transform: translateY(-10px);
+            border-color: var(--blue-mavyc);
+            box-shadow: 0 10px 30px rgba(0, 68, 255, 0.2);
+        }
+
+        .card-pilar i { font-size: 3rem; color: var(--blue-light); margin-bottom: 1.5rem; }
+        .card-pilar h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--white); }
+        .card-pilar p { color: var(--gray-text); line-height: 1.6; }
+
+        /* SIMULADOR DE IA */
+        .secao-simulador {
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .simulador-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 3rem;
+            border: 1px solid rgba(82, 181, 249, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .simulador-container h2 { font-size: 2.2rem; margin-bottom: 1rem; font-weight: 900; }
+        .simulador-container p { color: var(--gray-text); margin-bottom: 2rem; }
+
+        .ia-input {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--bg-dark);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+        .ia-input:focus { border-color: var(--blue-light); }
+
+        .btn-ia {
+            width: 100%;
+            background: var(--blue-mavyc);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-ia:hover { background: var(--blue-light); color: var(--bg-dark); }
+
+        #ia-loading { display: none; margin-top: 1.5rem; color: var(--blue-light); font-weight: bold; }
+        
+        #ia-resultado {
+            display: none;
+            margin-top: 2rem;
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-left: 4px solid var(--blue-light);
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .botoes-contato {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-zap-dual {
+            flex: 1;
+            min-width: 200px;
+            background: var(--green-zap);
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .btn-zap-dual:hover { background: #1ebc5a; transform: translateY(-2px); }
+
+        /* WHATSAPP FLUTUANTE (Central de Atendimento Geral) */
+        .zap-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--green-zap);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 9999;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .zap-float:hover { transform: scale(1.1); }
+
+        /* FOOTER COM CONTATOS */
+        footer {
+            background: #01040A;
+            padding: 4rem 5%;
+            text-align: center;
+            color: var(--gray-text);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .footer-contatos {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .contato-socio {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(82, 181, 249, 0.2);
+            text-decoration: none;
+            color: var(--white);
+            transition: 0.3s;
+        }
+        .contato-socio i { color: var(--green-zap); font-size: 1.2rem; }
+        .contato-socio:hover { border-color: var(--blue-light); color: var(--blue-light); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            nav ul { display: none; }
+            .btn-header { display: none; }
+        }
+    </style>
 </head>
 <body>
-    <div id="tela-login" class="tela ativa login-wrapper">
-        <div class="login-box">
-            <h2 style="color: var(--primaria); margin-bottom: 5px;">Mavyc PDV</h2>
-            <div class="input-group"><label>Usuário</label><input type="text" id="login-usuario"></div>
-            <div class="input-group"><label>Senha</label><input type="password" id="login-senha" onkeypress="if(event.key === 'Enter') fazerLogin()"></div>
-            <button class="btn-universal" onclick="fazerLogin()">Acessar PDV</button>
-        </div>
-    </div>
 
-    <div id="tela-pdv" class="tela">
-        <div class="top-bar">
-            <div><strong>CAIXA 01</strong> | Operador: <span id="caixa-nome-status">Padrão</span></div>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-universal" onclick="mostrarTela('tela-adm')" style="background: var(--alerta); color: #333; padding: 8px; width: auto;">Painel ADM</button>
-                <button class="btn-universal" onclick="sair()" style="background: #0f172a; padding: 8px; width: auto;">Sair</button>
-            </div>
-        </div>
-        <div class="pdv-container">
-            <div class="cupom-area">
-                <div class="produtos-lista" id="lista-cupom"></div>
-                <div class="total-box"><h3>TOTAL A PAGAR</h3><p>R$ <span id="valor-total">0.00</span></p></div>
-            </div>
-            <div class="operacao-area">
-                <div class="terminal-log" id="log-sistema"><div>[SISTEMA MAVYC] Terminal pronto. Módulo Vercel Proxy Ativo.</div></div>
-                
-                <div style="position: relative; display: flex; gap: 8px;">
-                    <input type="number" id="input-qtd-manual" value="1" style="width: 80px; text-align: center; font-size: 24px; border: 3px solid var(--secundaria); border-radius: 12px; font-weight: bold;">
-                    <div style="position: relative; flex: 1;">
-                        <input type="text" class="input-codigo" id="codigo-barras" placeholder="Bipe ou digite o código..." onkeydown="navegarSugestoes(event)" autocomplete="off">
-                    </div>
-                </div>
-                
-                <div class="fechamento-painel">
-                    <div class="input-group" style="margin: 0;">
-                        <label class="label-pagamento">Forma de Pagamento (F3)</label>
-                        <select id="forma-pagamento"><option>Dinheiro</option><option>PIX</option><option>Cartão</option></select>
-                    </div>
-                    <div class="input-group" style="margin: 0;">
-                        <label class="label-recebido">Valor Recebido (R$)</label>
-                        <input type="number" id="valor-pago" placeholder="0.00" oninput="calcularTroco()">
-                    </div>
-                    <div style="grid-column: span 2; text-align:right; font-weight:bold;" id="box-troco">Troco: R$ 0.00</div>
-                    <button class="btn-universal" onclick="finalizarVenda(false)" style="background: var(--sucesso);">FINALIZAR PEDIDO (F2)</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- CABEÇALHO -->
+    <header>
+        <a href="#" class="logo">MAVYC <span>DIGITAL</span></a>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Início</a></li>
+                <li><a href="#servicos">Nossa Engenharia</a></li>
+                <li><a href="#simulador">Simulador IA</a></li>
+            </ul>
+        </nav>
+        <a href="https://wa.me/5584981549052?text=Olá! Vim pelo site da Mavyc e quero escalar minhas vendas." class="btn-header" target="_blank">Falar com Especialista</a>
+    </header>
 
-    <div id="tela-adm" class="tela">
-        <div class="top-bar">
-            <div><strong>PAINEL GERENCIAL</strong></div>
-            <button class="btn-universal" onclick="mostrarTela('tela-pdv')" style="background: var(--primaria); width: auto; padding: 8px 15px;">Voltar ao Caixa</button>
-        </div>
-        <div class="dashboard-area">
-            <div style="background: white; padding: 25px; border-radius: 8px; border-left: 5px solid var(--fiscal);">
-                <h3>☁️ Sincronização Mavyc (Segurança Vercel Ativa)</h3>
-                <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">O Token do GitHub foi ocultado. Digite apenas o repositório.</p>
-                
-                <div class="input-group">
-                    <label>Repositório GitHub (Ex: seunome/pdv-cliente)</label>
-                    <input type="text" id="cloud-repo" placeholder="usuario/repositorio">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="salvarConfiguracaoNuvem()" class="btn-universal" style="background: var(--fiscal);">Salvar Repositório</button>
-                    <button onclick="forcarSincronizacaoNuvem()" class="btn-universal" style="background: var(--sucesso);">⚡ Forçar Sync Seguro</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero">
+        <h1>Sua empresa precisa de uma <span>Máquina de Vendas</span></h1>
+        <p>A Mavyc Digital une Engenharia de Sites Rápidos, Gestão de Tráfego Pago e Inteligência Artificial para atrair o cliente certo todos os dias para o seu negócio.</p>
+        <a href="#simulador" class="btn-primary">Criar Minha Estratégia Grátis</a>
+    </section>
 
-    <script>
-        let estoqueCloud = {}; let vendasRealizadas = []; let cupomAtual = []; let totalVenda = 0;
-        
-        window.onload = async function() {
-            document.getElementById('cloud-repo').value = localStorage.getItem('cloud_repo') || '';
-            const vendasSalvas = localStorage.getItem('vendas_realizadas');
-            if (vendasSalvas) vendasRealizadas = JSON.parse(vendasSalvas);
-            await carregarEstoqueCompletoDaNuvem();
-        };
+    <!-- PILARES DE SERVIÇO -->
+    <section id="servicos" class="pilares">
+        <h2>A Engenharia por trás da <span>Conversão</span></h2>
+        
+        <div class="grid-pilares">
+            <div class="card-pilar">
+                <i class="fa-solid fa-code"></i>
+                <h3>Sites de Alta Performance</h3>
+                <p>O seu cliente não tem paciência para sites lentos. Criamos Landing Pages com carregamento instantâneo, design agressivo e focadas 100% em capturar contatos.</p>
+            </div>
+            
+            <div class="card-pilar">
+                <i class="fa-solid fa-bullseye"></i>
+                <h3>Tráfego Pago Cirúrgico</h3>
+                <p>Chega de comprar cliques que não viram vendas. Nossas campanhas no Google e Meta Ads são desenhadas para cercar quem já está com o cartão de crédito na mão.</p>
+            </div>
+            
+            <div class="card-pilar">
+                <i class="fa-solid fa-robot"></i>
+                <h3>Automação & IA</h3>
+                <p>Implementamos Assistentes Virtuais Inteligentes no seu ecossistema. Seu negócio passa a atender, qualificar e direcionar clientes 24 horas por dia, 7 dias por semana.</p>
+            </div>
+        </div>
+    </section>
 
-        async function carregarEstoqueCompletoDaNuvem() {
-            let repo = localStorage.getItem('cloud_repo');
-            if(repo) {
-                try {
-                    let res = await fetch(`https://raw.githubusercontent.com/${repo}/main/precos.json`);
-                    if (res.ok) { estoqueCloud = await res.json(); localStorage.setItem('estoque_mercado', JSON.stringify(estoqueCloud)); return; }
-                } catch(e) {}
-            }
-            estoqueCloud = {"789123456001": {"nome": "PRODUTO TESTE", "preco": 10.00}}; localStorage.setItem('estoque_mercado', JSON.stringify(estoqueCloud));
-        }
+    <!-- SIMULADOR DE IA -->
+    <section id="simulador" class="secao-simulador">
+        <div class="simulador-container">
+            <h2>Simulador de Estratégia <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--blue-light);"></i></h2>
+            <p>Nossa IA desenha o escopo perfeito para o seu negócio em segundos. Digite o seu nicho abaixo (Ex: Clínica de Estética, Imobiliária, Loja de Rodas):</p>
+            
+            <input type="text" id="nichoCliente" class="ia-input" placeholder="Qual é o seu ramo de atuação?">
+            <button class="btn-ia" onclick="gerarEstrategiaIA()"><i class="fa-solid fa-bolt"></i> Gerar Máquina de Vendas</button>
 
-        function mostrarTela(id) { document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa')); document.getElementById(id).classList.add('ativa'); }
+            <div id="ia-loading">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> A IA está analisando a concorrência do seu setor...
+            </div>
 
-        function fazerLogin() {
-            const u = document.getElementById('login-usuario').value; const s = document.getElementById('login-senha').value;
-            if (u === 'joao' && s === 'admin123') mostrarTela('tela-pdv');
-        }
-        function sair() { mostrarTela('tela-login'); }
+            <div id="ia-resultado">
+                <h4 style="color: white; margin-bottom: 10px;"><i class="fa-solid fa-check" style="color: var(--green-zap);"></i> Estratégia Mapeada!</h4>
+                <p id="resposta-ia" style="color: var(--gray-text); line-height: 1.6;"></p>
+                
+                <!-- BOTÕES DE CONTATO DOS SÓCIOS -->
+                <div class="botoes-contato">
+                    <a href="https://wa.me/5584981549052?text=Olá Tiago! Fiz o teste no simulador da Mavyc e quero aplicar essa estratégia." target="_blank" class="btn-zap-dual">
+                        <i class="fa-brands fa-whatsapp"></i> Falar com Tiago (Projetos)
+                    </a>
+                    <a href="https://wa.me/5584994649251?text=Olá Maycon! Fiz o teste no simulador da Mavyc e quero iniciar o tráfego." target="_blank" class="btn-zap-dual" style="background: #10B981;">
+                        <i class="fa-brands fa-whatsapp"></i> Falar com Maycon (Tráfego)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        function navegarSugestoes(e) {
-            if(e.key === 'Enter') {
-                let txt = document.getElementById('codigo-barras').value; let qtd = document.getElementById('input-qtd-manual').value || 1;
-                if(estoqueCloud[txt]) { addCupom(txt, qtd); }
-            }
-        }
+    <!-- FOOTER COM EQUIPE -->
+    <footer>
+        <h2 style="color: var(--white); font-weight: 900; margin-bottom: 10px;">MAVYC <span style="color: var(--blue-light);">DIGITAL</span></h2>
+        <p>Acelerando negócios locais e digitais através da tecnologia e tráfego pago.</p>
+        
+        <div class="footer-contatos">
+            <a href="https://wa.me/5584981549052?text=Olá Tiago, vim pelo site da Mavyc." target="_blank" class="contato-socio">
+                <i class="fa-brands fa-whatsapp"></i> Tiago Rafael | Especialista Web
+            </a>
+            <a href="https://wa.me/5584994649251?text=Olá Maycon, vim pelo site da Mavyc." target="_blank" class="contato-socio">
+                <i class="fa-brands fa-whatsapp"></i> Maycon | Gestor de Tráfego
+            </a>
+        </div>
 
-        function addCupom(cod, qtd) {
-            const p = estoqueCloud[cod]; cupomAtual.push({ cod: cod, nome: p.nome, qtd: qtd, unit: p.preco, total: p.preco * qtd });
-            document.getElementById('codigo-barras').value = ''; renderizarCupom();
-        }
+        <p style="margin-top: 2rem; font-size: 0.8rem;">&copy; 2026 Mavyc Digital. Todos os direitos reservados.</p>
+    </footer>
 
-        function renderizarCupom() {
-            const lista = document.getElementById('lista-cupom'); lista.innerHTML = ''; totalVenda = 0;
-            cupomAtual.forEach((item, i) => { totalVenda += item.total; lista.innerHTML += `<div class="item-cupom"><span>${item.nome}</span><span>${item.total.toFixed(2)}</span></div>`; });
-            document.getElementById('valor-total').innerText = totalVenda.toFixed(2); calcularTroco();
-        }
+    <!-- ZAP FLUTUANTE (Apontando pro Tiago como contato primário geral) -->
+    <a href="https://wa.me/5584981549052?text=Olá! Quero transformar meu site numa máquina de vendas." class="zap-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
-        function calcularTroco() {
-            const pago = parseFloat(document.getElementById('valor-pago').value || 0);
-            document.getElementById('box-troco').innerText = `Troco: R$ ${(pago >= totalVenda ? pago - totalVenda : 0).toFixed(2)}`;
-        }
+    <!-- SCRIPT SIMULADOR -->
+    <script>
+        function gerarEstrategiaIA() {
+            const nicho = document.getElementById('nichoCliente').value;
+            if(!nicho) { alert("Por favor, digite o nicho da sua empresa!"); return; }
 
-        function finalizarVenda(nfce) {
-            vendasRealizadas.push({ data: new Date().toLocaleString(), total: totalVenda });
-            localStorage.setItem('vendas_realizadas', JSON.stringify(vendasRealizadas));
-            cupomAtual = []; totalVenda = 0; renderizarCupom();
-        }
+            document.getElementById('ia-resultado').style.display = 'none';
+            document.getElementById('ia-loading').style.display = 'block';
 
-        function logTerminal(msg) {
-            const log = document.getElementById('log-sistema');
-            log.innerHTML += `<div>> ${msg}</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        async function forcarSincronizacaoNuvem() {
-            let repo = localStorage.getItem('cloud_repo'); 
-            if (!repo) { alert("Configure o repositório no Painel ADM."); return; }
-
-            logTerminal("Iniciando sync seguro com Vercel Proxy...");
-            
-            try {
-                let bodyPayload = { 
-                    repo: repo,
-                    message: "Sincronização Segura PDV Mavyc", 
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(estoqueCloud))))
-                };
-
-                let res = await fetch('/api/sync', { 
-                    method: "PUT", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(bodyPayload) 
-                });
-
-                if(res.ok) {
-                    alert("✅ Backup na nuvem realizado com segurança!");
-                    logTerminal("Sync concluído com sucesso.");
-                } else {
-                    let err = await res.json();
-                    alert("❌ Erro de sincronização: " + (err.error || "Desconhecido"));
-                    logTerminal("Erro no Proxy Vercel.");
-                }
-            } catch(err) { 
-                alert("❌ Falha de conexão. O PDV operará offline."); 
-                logTerminal("Falha de conexão com a API.");
-            }
-        }
-
-        function salvarConfiguracaoNuvem() { 
-            localStorage.setItem('cloud_repo', document.getElementById('cloud-repo').value); 
-            alert("Repositório salvo!");
-        }
-    </script>
+            setTimeout(() => {
+                document.getElementById('ia-loading').style.display = 'none';
+                document.getElementById('resposta-ia').innerHTML = `Para o setor de <strong>${nicho}</strong>, a estratégia de maior conversão hoje é:<br><br>1. Uma Landing Page de Alta Velocidade com carregamento instantâneo.<br>2. Campanhas focadas no Google/Meta Ads para captar clientes já com intenção de compra.<br>3. Um Assistente de IA para responder clientes fora do horário comercial.<br><br>Escolha abaixo com quem da nossa equipe você deseja iniciar:`;
+                document.getElementById('ia-resultado').style.display = 'block';
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
